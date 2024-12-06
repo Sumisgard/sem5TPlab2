@@ -121,13 +121,14 @@ namespace smd
         obj.set_lastName(lastName);
         obj.set_sign(sign);
         obj.set_birthDate(day, month, year);
+
+        return in;
     }
 
     Container::Container()
     {
         this->signs = new Sign[1];
-        this->size = 0;
-        this->actualSize = 1;
+        this->actualSize = 0;
     }
 
     Container::Container(const Container& obj)
@@ -137,6 +138,7 @@ namespace smd
         {
             this->signs[i] = obj.signs[i];
         }
+        this->actualSize = obj.actualSize;
     }
 
     Container::~Container()
@@ -144,7 +146,7 @@ namespace smd
         delete[] this->signs;
     }
 
-    static Sign* widenSigns(const Sign* const signs, unsigned size)
+    Sign* widenSigns(const Sign* const signs, unsigned size)
     {
         Sign* copySigns = new Sign[size + 1];
 
@@ -156,41 +158,79 @@ namespace smd
         return copySigns;
     }
 
+    void Container::addSign(const Sign& obj)
+    {
+        if (this->actualSize == 0)
+        {
+            this->signs[0] = obj;
+            ++(this->actualSize);
+        }
+        else
+        {
+            Sign* signsCopy = widenSigns(this->signs, this->actualSize);
+            signsCopy[this->actualSize] = obj;
+            
+            ++(this->actualSize);
+            delete[] this->signs;
+            this->signs = signsCopy;
+        }
+    }
+
     void Container::addSign(std::string firstName, std::string lastName, std::string sign, unsigned day, unsigned month, unsigned year)
     {
-        Sign* signsCopy = widenSigns(this->signs, this->actualSize);
+        if (this->actualSize == 0)
+        {
+            this->signs[0].set_firstName(firstName);
+            this->signs[0].set_lastName(lastName);
+            this->signs[0].set_sign(sign);
+            this->signs[0].set_birthDate(day, month, year);
+            ++(this->actualSize);
+        }
+        else
+        {
+            Sign* signsCopy = widenSigns(this->signs, this->actualSize);
 
-        signsCopy[this->actualSize].set_firstName(firstName);
-        signsCopy[this->actualSize].set_lastName(lastName);
-        signsCopy[this->actualSize].set_sign(sign);
-        signsCopy[this->actualSize].set_birthDate(day, month, year);
+            signsCopy[this->actualSize].set_firstName(firstName);
+            signsCopy[this->actualSize].set_lastName(lastName);
+            signsCopy[this->actualSize].set_sign(sign);
+            signsCopy[this->actualSize].set_birthDate(day, month, year);
 
-        ++(this->actualSize);
-        ++(this->size);
-        delete[] this->signs;
-        this->signs = signsCopy;
+            ++(this->actualSize);
+            delete[] this->signs;
+            this->signs = signsCopy;            
+        }
     }
 
     void Container::deleteSign(unsigned index)
     {
-        Sign* signsNarrow = new Sign[this->actualSize - 1];
-
-        for (int i, j = 0; i < this->actualSize; ++i)
+        this->sortByDate();
+        if (this->actualSize == 1)
         {
-            if (i != index)
-            {
-                signsNarrow[j] = this->signs[i];
-                ++j;
-            }
+            this->signs[0] = Sign();
+            --(this->actualSize);
         }
+        else
+        {
+            Sign* signsNarrow = new Sign[this->actualSize - 1];
 
-        delete[] this->signs;
-        this->signs = signsNarrow;
+            for (int i, j = 0; i < this->actualSize; ++i)
+            {
+                if (i != index - 1)
+                {
+                    signsNarrow[j] = this->signs[i];
+                    ++j;
+                }
+            }
+
+            --(this->actualSize);
+            delete[] this->signs;
+            this->signs = signsNarrow;        
+        }
     }
     
     void Container::sortByDate()
     {
-        unsigned n = this->actualSize;
+        int n = this->actualSize;
         bool swapped = true;
 
         for (int i = 0; i < n - 1; ++i)
@@ -198,7 +238,21 @@ namespace smd
             swapped = false;
             for (int j = 0; j < n - i - 1; ++j)
             {
-                if (this->signs[j].get_year() > this->signs[j + 1].get_year() && this->signs[j].get_month() > this->signs[j + 1].get_month() && this->signs[j].get_day() > this->signs[j + 1].get_day())
+                if (this->signs[j].get_year() > this->signs[j + 1].get_year())
+                {
+                    Sign temp = this->signs[j];
+                    this->signs[j] = this->signs[j + 1];
+                    this->signs[j + 1] = temp;
+                    swapped = true;
+                }
+                else if (this->signs[j].get_month() > this->signs[j + 1].get_month())
+                {
+                    Sign temp = this->signs[j];
+                    this->signs[j] = this->signs[j + 1];
+                    this->signs[j + 1] = temp;
+                    swapped = true;
+                }
+                else if (this->signs[j].get_day() > this->signs[j + 1].get_day())
                 {
                     Sign temp = this->signs[j];
                     this->signs[j] = this->signs[j + 1];
@@ -218,18 +272,22 @@ namespace smd
         Container sortedContainer(*this);
         sortedContainer.sortByDate();
 
-        for (int i = 1; i < this->actualSize; ++i)
+        for (int i = 0; i < this->actualSize; ++i)
         {
-            std::cout << sortedContainer.signs[i];
+            std::cout << "\t" << i + 1 << ". " << sortedContainer.signs[i];
         }
     }
+    
     void Container::printBySign(std::string sign) const
     {
-        for (int i = 1; i < this->actualSize; ++i)
+        Container sortedContainer(*this);
+        sortedContainer.sortByDate();
+
+        for (int i = 0; i < this->actualSize; ++i)
         {
             if (this->signs[i].get_sign() == sign)
             {
-                std::cout << this->signs[i];
+                std::cout << "\t" << i + 1 << ". " << sortedContainer.signs[i];
             }
             else
             {

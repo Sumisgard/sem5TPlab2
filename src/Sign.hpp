@@ -45,6 +45,7 @@ namespace smd
     };
     std::ostream& operator << (std::ostream &os, const Sign &obj);
     std::istream& operator >> (std::istream& in, Sign& obj);
+    Sign* widenSigns(const Sign* const signs, unsigned size);
 
     class Container
     {
@@ -53,6 +54,7 @@ namespace smd
         Container(const Container& obj);
         ~Container();
 
+        void addSign(const Sign& obj);
         void addSign(std::string firstName, std::string lastName, std::string sign, unsigned day, unsigned month, unsigned year);
         void deleteSign(unsigned index);
         void sortByDate();
@@ -61,9 +63,7 @@ namespace smd
 
     private:
         Sign* signs;
-        unsigned size;
         unsigned actualSize;
-
-        static Sign* widenSigns(const Sign* const signs, unsigned size);
     };
+
 }
