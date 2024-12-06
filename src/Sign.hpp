@@ -45,5 +45,25 @@ namespace smd
     };
     std::ostream& operator << (std::ostream &os, const Sign &obj);
     std::istream& operator >> (std::istream& in, Sign& obj);
-    
+
+    class Container
+    {
+    public:
+        Container();
+        Container(const Container& obj);
+        ~Container();
+
+        void addSign(std::string firstName, std::string lastName, std::string sign, unsigned day, unsigned month, unsigned year);
+        void deleteSign(unsigned index);
+        void sortByDate();
+        void printAll() const;
+        void printBySign(std::string sign) const;
+
+    private:
+        Sign* signs;
+        unsigned size;
+        unsigned actualSize;
+
+        static Sign* widenSigns(const Sign* const signs, unsigned size);
+    };
 }
