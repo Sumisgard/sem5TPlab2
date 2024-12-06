@@ -59,7 +59,11 @@ int main()
         }
         break;
     case 2:
-        /* code */
+        std::cout << "Enter path to file: " << std::endl;
+        std::cin >> sign;
+        smd::Task task;
+        task.readAndPrint(sign);
+        
         break;
     default:
         break;
