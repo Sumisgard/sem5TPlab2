@@ -231,6 +231,10 @@ namespace smd
             {
                 std::cout << this->signs[i];
             }
+            else
+            {
+                std::cout << "No such sign\n";
+            }
         }
     }
 }
